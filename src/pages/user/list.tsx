@@ -1,7 +1,21 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { db } from '@/db';
+
+const iframeHtml = `
+  <!doctype html>
+  <html>
+  <head>
+    <script>
+      document.domain = "app.fujia.site";
+      // window.parent.iframeReady();
+      window.parent.dispatchEvent(new CustomEvent("iframeReady"));
+    </script>
+  </head>
+  <body></body>
+  </html>
+`;
 
 function UserList() {
   const friends = useLiveQuery(async () => {
@@ -9,6 +23,13 @@ function UserList() {
 
     return myFriends;
   });
+
+  useEffect(() => {
+    window.addEventListener('iframeReady', () => {
+      console.log('iframe is ready!');
+    });
+    return () => {};
+  }, []);
 
   return (
     <>
@@ -19,6 +40,7 @@ function UserList() {
           </li>
         ))}
       </ul>
+      <iframe srcDoc={iframeHtml} src="https://app.fujia.site"></iframe>
     </>
   );
 }
